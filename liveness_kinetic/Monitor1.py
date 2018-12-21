@@ -61,9 +61,9 @@ class Monitor1(DynamicPolicy):
                              ### 4. SET UP POLICY AND EVENT STREAMS
                              
                              ### This part pretty much remains same for any application
-                             fsm_pol = FSMPolicy(lpec,self.fsm_def)
-                             json_event = JSONEvent()
-                             json_event.register_callback(fsm_pol.event_handler)
+                        fsm_pol = FSMPolicy(lpec,self.fsm_def)
+                        json_event = JSONEvent()
+                        json_event.register_callback(fsm_pol.event_handler)
                                        ### This part pretty much remains same for any application
                                        
                                        # Specify application class name here. (e.g., "ids")
