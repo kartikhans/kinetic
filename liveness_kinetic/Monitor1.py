@@ -46,7 +46,7 @@ class Monitor1(DynamicPolicy):
     @transition
     def policy(self):
         # If "infected" is True, change policy to "drop"
-        if((is_true(V(counter)>=rates[2] and V(counter)<rates[3])):
+        if(V(counter)>=rates[2] and V(counter)<rates[3]):
            self.case((is_true(V(counter)>=rates[2] and V(counter)<rates[3])),C(drop))
         # Default policy is "indentity", which is "allow".
         self.default(C(fwd()))
