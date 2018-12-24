@@ -46,63 +46,62 @@ class Monitor1(DynamicPolicy):
     @transition
     def policy(self):
         # If "infected" is True, change policy to "drop"
-        if(V(counter)>=rates[2] and V(counter)<rates[3]):
+        if((is_true(V(counter)>=rates[2] and V(counter)<rates[3])):
            self.case((is_true(V(counter)>=rates[2] and V(counter)<rates[3])),C(drop))
-        # Default policy is "indentity", which is "allow".
-        self.default(C(identity))
-    ### 3. SET UP THE FSM DESCRIPTION
-
-    self.fsm_def =FSMDef(
-                         
-                         counter=FSMVar(type=int(),init=counter,trans=counter),
-                         policy=FSMVar(type=Type(Policy,{drop,identity}),
-                                       init=identity,
-                                       trans=policy))
-                             ### 4. SET UP POLICY AND EVENT STREAMS
-                             
-                             ### This part pretty much remains same for any application
-                        fsm_pol = FSMPolicy(lpec,self.fsm_def)
-                        json_event = JSONEvent()
-                        json_event.register_callback(fsm_pol.event_handler)
-                                       ### This part pretty much remains same for any application
-                                       
-                                       # Specify application class name here. (e.g., "ids")
-    super(ids,self).__init__(fsm_pol)
-
-def main():
-    
-    # DynamicPolicy that is going to be returned
-    pol = Monitor1()
-    
-    # For NuSMV
-    smv_str = fsm_def_to_smv_model(pol.fsm_def)
-    mc = ModelChecker(smv_str, 'Monitor1')
-    
-    ## Add specs
-    mc.add_spec("FAIRNESS\n  counter;")
-    
-    ### If infected event is true, next policy state is 'drop'
-    mc.add_spec("SPEC AG (V(counter)>=rates[2] and V(counter)<rates[3]) -> AX policy=drop)")
-    ### If infected event is false, next policy state is 'allow'
-    mc.add_spec("SPEC AG (V(counter)>=0 and V(counter)<=rates[2] -> AX policy=policy_1)")
-    
-    ### Policy state is 'allow' until infected is true.
-    mc.add_spec("SPEC A [ policy=policy_1 U (V(counter)>=rates[2] and V(counter)<rates[3]) ]")
-    
-    ### It is always possible to go back to 'allow'
-    mc.add_spec("SPEC AG EF policy=policy_1")
-    
-    # Save NuSMV file
-    mc.save_as_smv_file()
-    
-    # Verify
-    mc.verify()
-    
-    # Ask deployment
-    ask_deploy()
-    
-    # Return DynamicPolicy.
-    # flood() will take for of forwarding for this simple example.
-    return pol >> flood()
-
-
+           # Default policy is "indentity", which is "allow".
+           self.default(C(fwd()))
+           ### 3. SET UP THE FSM DESCRIPTION
+           
+           self.fsm_def =FSMDef(
+                                counter=FSMVar(type=int(),init=counter,trans=counter)
+                                policy=FSMVar(type=Type(Policy,{drop,fwd()}),
+                                              init=fwd(),
+                                              trans=policy))
+           ### 4. SET UP POLICY AND EVENT STREAMS
+           
+           ### This part pretty much remains same for any application
+           fsm_pol = FSMPolicy(lpec,self.fsm_def)
+           json_event = JSONEvent()
+           json_event.register_callback(fsm_pol.event_handler)
+           ### This part pretty much remains same for any application
+           
+           # Specify application class name here. (e.g., "ids")
+           super(ids,self).__init__(fsm_pol)
+           
+    def main():
+           
+           # DynamicPolicy that is going to be returned
+           pol = Monitor1()
+           
+           # For NuSMV
+           smv_str = fsm_def_to_smv_model(pol.fsm_def)
+           mc = ModelChecker(smv_str, 'Monitor1')
+           
+           ## Add specs
+           mc.add_spec("FAIRNESS\n  counter;")
+           
+           ### If infected event is true, next policy state is 'drop'
+           mc.add_spec("SPEC AG (V(counter)>=rates[2] and V(counter)<rates[3]) -> AX policy=drop)")
+           ### If infected event is false, next policy state is 'allow'
+           mc.add_spec("SPEC AG (V(counter)>=0 and V(counter)<=rates[2] -> AX policy=policy_1)")
+           
+           ### Policy state is 'allow' until infected is true.
+           mc.add_spec("SPEC A [ policy=policy_1 U (V(counter)>=rates[2] and V(counter)<rates[3]) ]")
+           
+           ### It is always possible to go back to 'allow'
+           mc.add_spec("SPEC AG EF policy=policy_1")
+           
+           # Save NuSMV file
+           mc.save_as_smv_file()
+           
+           # Verify
+           mc.verify()
+           
+           # Ask deployment
+           ask_deploy()
+           
+           # Return DynamicPolicy.
+           # flood() will take for of forwarding for this simple example.
+           return pol >> flood()
+           
+           
