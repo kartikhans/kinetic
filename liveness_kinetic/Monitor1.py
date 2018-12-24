@@ -43,19 +43,17 @@ class Monitor1(DynamicPolicy):
         @transition
         def policy(self):
         # If "infected" is True, change policy to "drop"
-            if(V(counter)>=rates[2] and V(counter)<rates[3]):
-            self.case(((V(counter)>=rates[2] and V(counter)<rates[3])),C(drop))
+            if((is_true(V(counter)>=rates[2]) and is_true(V(counter)<rates[3]))):
+                self.case((is_true(V(counter)>=rates[2]) and is_true(V(counter)<rates[3])),C(drop))
         # Default policy is "indentity", which is "allow".
             self.default(C(identity))
     ### 3. SET UP THE FSM DESCRIPTION
 
-    self.fsm_def =FSMDef(
-
+        self.fsm_def =FSMDef(
                          counter=FSMVar(type=int(),init=counter,trans=counter),
                          policy=FSMVar(type=Type(Policy,{drop,identity}),
                                        init=identity,
                                        trans=policy))
-
         ### 4. SET UP POLICY AND EVENT STREAMS
         fsm_pol = FSMPolicy(lpec,self.fsm_def)
         json_event = JSONEvent()
