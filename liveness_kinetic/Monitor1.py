@@ -44,7 +44,7 @@ class Monitor1(DynamicPolicy):
         def policy(self):
         # If "infected" is True, change policy to "drop"
             if(V(counter)>=rates[2] and V(counter)<rates[3]):
-            self.case((is_true(V(counter)>=rates[2] and V(counter)<rates[3])),C(drop))
+            self.case(((V(counter)>=rates[2] and V(counter)<rates[3])),C(drop))
         # Default policy is "indentity", which is "allow".
             self.default(C(identity))
     ### 3. SET UP THE FSM DESCRIPTION
