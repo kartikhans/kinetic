@@ -69,12 +69,12 @@ def main():
 
     ## Add specs
     ### If infected event is true, next policy state is 'drop'
-    mc.add_spec("SPEC AG ((counter >= v2) -> AX policy=drop)")
+    mc.add_spec("SPEC AG ((counter >= 2) -> AX policy=drop)")
     ### If infected event is false, next policy state is 'allow'
-    mc.add_spec("SPEC AG (counter < v2 -> AX policy=policy_2)")
+    mc.add_spec("SPEC AG (counter < 7 -> AX policy=policy_2)")
 
     ### Policy state is 'allow' until infected is true.
-    mc.add_spec("SPEC A [ policy=policy_1 U (counter<m) ]")
+    mc.add_spec("SPEC A [ policy=policy_1 U counter < 10 ]")
 
     ### It is always possible to go back to 'allow'
     mc.add_spec("SPEC AG EF policy=policy_2")
