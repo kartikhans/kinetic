@@ -69,14 +69,13 @@ def main():
     mc = ModelChecker(smv_str, 'monitor')
 
     ## Add specs
-    mc.add_spec("FAIRNESS\n  counter;")
     ### If infected event is true, next policy state is 'drop'
-    mc.add_spec("SPEC AG (counter>=v2 & counter<m -> AX policy=drop)")
+    mc.add_spec("SPEC AG (counter>=v2 -> AX policy=drop)")
     ### If infected event is false, next policy state is 'allow'
     mc.add_spec("SPEC AG (counter>=0 & counter<v2 -> AX policy=policy_2)")
 
     ### Policy state is 'allow' until infected is true.
-    mc.add_spec("SPEC A [ policy=policy_2 U (counter>=v2 and counter<m) ]")
+    mc.add_spec("SPEC A [ policy=policy_1 U (counter>=v2 and counter<m) ]")
 
     ### It is always possible to go back to 'allow'
     mc.add_spec("SPEC AG EF policy=policy_2")
