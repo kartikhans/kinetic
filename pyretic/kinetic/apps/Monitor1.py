@@ -39,7 +39,7 @@ class Monitor1(DynamicPolicy):
     ### 2. SET UP TRANSITION FUNCTIONS
         @transition
         def counter(self):
-            self.case(occured(self.event),self.event)
+            return (Monitor1.count)
         @transition
         def policy(self):
         # If "infected" is True, change policy to "drop"
@@ -50,7 +50,7 @@ class Monitor1(DynamicPolicy):
     ### 3. SET UP THE FSM DESCRIPTION
 
         self.fsm_def =FSMDef(
-                         counter=FSMVar(type=int(),init=count,trans=counter),
+                         counter=FSMVar(type=int(),init=0,trans=counter),
                          policy=FSMVar(type=Type(Policy,{drop,identity}),
                                        init=identity,
                                        trans=policy))
