@@ -69,17 +69,18 @@ def main():
     mc = ModelChecker(smv_str, 'monitor')
 
     ## Add specs
+    mc.add_spec("FAIRNESS\n  counter;")
     ### If infected event is true, next policy state is 'drop'
-    mc.add_spec("SPEC AG (rate>=v2 & rate<m -> AX policy=drop)")
+    mc.add_spec("SPEC AG ((rate>=v2 & rate<m) -> AX policy=drop)")
     ### If infected event is false, next policy state is 'allow'
-    mc.add_spec("SPEC AG (rate>=0 & rate<v2 -> AX policy=policy_1)")
+    mc.add_spec("SPEC AG ((rate>=0 & rate<v2) -> AX policy=policy_1)")
 
     ### Policy state is 'allow' until infected is true.
-    mc.add_spec("SPEC A [ policy=policy_1 U (rate>=v2 and rate<m) ]")
+    mc.add_spec("SPEC A [ policy=policy_1 U (rate>=v2 and rate<m)]")
 
-    ### It is always possible to go back to 'allow'
-    mc.add_spec("SPEC AG EF policy=policy_1")
-
+    mc.add_spec("SPEC AG (EF policy=policy_1)")
+    mc.add_spec("SPEC policy=policy_1 -> EX policy=policy_1")
+    mc.add_spec("SPEC AG (policy=policy_1 -> EF policy=policy_2)")
     # Save NuSMV file
     mc.save_as_smv_file()
 
