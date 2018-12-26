@@ -44,7 +44,6 @@ class Monitor1(DynamicPolicy):
         def counter(self):
             Monitor1.count+=1
             pol_change=False
-            print 'hey'
             if(Monitor1.count>=Monitor1.rates[2] and Monitor1.count<Monitor1.rates[3]):
                 pol_change=True
             self.case(is_true(V('pol_change')),C(True))
