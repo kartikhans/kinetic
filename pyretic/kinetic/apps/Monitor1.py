@@ -39,18 +39,22 @@ class Monitor1(DynamicPolicy):
     ### 2. SET UP TRANSITION FUNCTIONS
         @transition
         def counter(self):
-            return (Monitor1.count)
+            pol_change=False
+            if(self.count>=rates[2] and self.count<rates[3]){
+                pol_change=True
+            }
+            self.case(is_true(V('pol_change')),C(True))
+            self.default(C(False))
         @transition
         def policy(self):
         # If "infected" is True, change policy to "drop"
-            if((is_true(V(counter)>=rates[2]) and is_true(V(counter)<rates[3]))):
-                self.case((is_true(V(counter)>=rates[2]) and is_true(V(counter)<rates[3])),C(drop))
+            self.case(is_true(V('counter')),C(drop))
         # Default policy is "indentity", which is "allow".
             self.default(C(identity))
     ### 3. SET UP THE FSM DESCRIPTION
 
         self.fsm_def =FSMDef(
-                         counter=FSMVar(type=int(),init=0,trans=counter),
+                         counter=FSMVar(type=BoolType(),init=False,trans=counter),
                          policy=FSMVar(type=Type(Policy,{drop,identity}),
                                        init=identity,
                                        trans=policy))
