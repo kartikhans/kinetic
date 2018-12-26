@@ -43,9 +43,7 @@ class Monitor1(DynamicPolicy):
         @transition
         def counter(self):
             Monitor1.count+=1
-            pol_change=False
-            if(Monitor1.count>=Monitor1.rates[2] and Monitor1.count<Monitor1.rates[3]):
-                pol_change=True
+            self.case(is_true((V('Monitor1.count')>=Monitor1.rates[2]) & (V('Monitor1.count')<Monitor1.rates[3])),C(True))
             self.case(is_true(V('pol_change')),C(True))
         @transition
         def policy(self):
