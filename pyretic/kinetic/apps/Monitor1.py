@@ -25,12 +25,13 @@ from pyretic.kinetic.apps.mac_learner import *
 
 ### Define a class for the application, subclassed from DynamicPolicy
 class Monitor1(DynamicPolicy):
+    count=0
     def __init__(self):
         v1=2
         v2=7
         m=10
         rates=[0,v1,v2,m]
-        counter=0
+        Monitor1.count+=1
     ### 1. DEFINE THE LPEC FUNCTION
         def lpec(f):
             return match(srcip=f['srcip'])
@@ -38,7 +39,6 @@ class Monitor1(DynamicPolicy):
     ### 2. SET UP TRANSITION FUNCTIONS
         @transition
         def counter(self):
-            self.counter+=1
             self.case(occured(self.event),self.event)
         @transition
         def policy(self):
@@ -50,7 +50,7 @@ class Monitor1(DynamicPolicy):
     ### 3. SET UP THE FSM DESCRIPTION
 
         self.fsm_def =FSMDef(
-                         counter=FSMVar(type=int(),init=counter,trans=counter),
+                         counter=FSMVar(type=int(),init=count,trans=counter),
                          policy=FSMVar(type=Type(Policy,{drop,identity}),
                                        init=identity,
                                        trans=policy))
@@ -70,7 +70,6 @@ def main():
 
     ## Add specs
     mc.add_spec("FAIRNESS\n  counter;")
-    mc.add_spec("FAIRNESS\n  infected;")
     ### If infected event is true, next policy state is 'drop'
     mc.add_spec("SPEC AG (V(counter)>=rates[2] and V(counter)<rates[3]) -> AX policy=drop)")
     ### If infected event is false, next policy state is 'allow'
