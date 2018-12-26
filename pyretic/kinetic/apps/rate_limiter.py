@@ -5,12 +5,12 @@ from pyretic.lib.std import *
 from pyretic.lib.query import *
 
 from pyretic.kinetic.fsm_policy import *
-from pyretic.kinetic.drivers.json_event import JSONEvent 
+from pyretic.kinetic.drivers.json_event import JSONEvent
 from pyretic.kinetic.smv.model_checker import *
 from pyretic.kinetic.apps.mac_learner import *
 from pyretic.kinetic.apps.monitor import *
 
-    
+
 
 #####################################################################################################
 # * App launch
@@ -19,7 +19,7 @@ from pyretic.kinetic.apps.monitor import *
 # * Mininet Generation (in "~/pyretic/pyretic/kinetic" directory)
 #   - sudo mn --controller=remote,ip=127.0.0.1 --mac --arp --switch ovsk --link=tc --custom mininet_topos/example_topos.py --topo=ratelimit
 #
-# * Start ping from h1 to h2 
+# * Start ping from h1 to h2
 #   - mininet> h1 ping h2
 #
 # * Events to rate limit to level '2' (100ms delay bidirectional) (in "~/pyretic/pyretic/kinetic" directory)
@@ -39,7 +39,7 @@ class rate_limiter(DynamicPolicy):
     def __init__(self):
 
         ### DEFINE INTERNAL METHODS
-        
+
         rates = [1,2,3]
 
         def interswitch():
@@ -50,7 +50,7 @@ class rate_limiter(DynamicPolicy):
             match_inport = union([match(inport=2),match(inport=3),match(inport=4)])
 
             r = if_(match_inter,interswitch(), if_(match_inport, fwd(1), drop))
-            
+
             return r
 
         def rate_limit_policy(i):
@@ -81,8 +81,8 @@ class rate_limiter(DynamicPolicy):
 
 
         ### SET UP THE FSM DESCRIPTION
-    
-        self.fsm_def = FSMDef( 
+
+        self.fsm_def = FSMDef(
             rate=FSMVar(type=Type(int,set(rates)),
                          init=1,
                          trans=rate),
@@ -94,7 +94,7 @@ class rate_limiter(DynamicPolicy):
         fsm_pol = FSMPolicy(lpec, self.fsm_def)
         json_event = JSONEvent()
         json_event.register_callback(fsm_pol.event_handler)
-        
+
         super(rate_limiter,self).__init__(fsm_pol)
 
 
@@ -103,16 +103,16 @@ def main():
 
     # For NuSMV
     smv_str = fsm_def_to_smv_model(pol.fsm_def)
-    mc = ModelChecker(smv_str,'rate_limiter')  
+    mc = ModelChecker(smv_str,'rate_limiter')
 
-    ## Add specs 
+    ## Add specs
     mc.add_spec("SPEC AG (rate=1 -> AX policy=policy_1)")
     mc.add_spec("SPEC AG (rate=2 -> AX policy=policy_2)")
     mc.add_spec("SPEC AG (rate=3 -> AX policy=policy_3)")
     mc.add_spec("SPEC AG (EF policy=policy_1)")
     mc.add_spec("SPEC policy=policy_1 -> EX policy=policy_1")
     mc.add_spec("SPEC AG (policy=policy_1 -> EF policy=policy_2)")
- 
+
     mc.save_as_smv_file()
     mc.verify()
 
@@ -121,5 +121,3 @@ def main():
 
 #    return pol
     return pol >> monitor()
-
-
