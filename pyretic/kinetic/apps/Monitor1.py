@@ -43,7 +43,6 @@ class Monitor1(DynamicPolicy):
             if(Monitor1.count>=rates[2] and Monitor1.count<rates[3]):
                 pol_change=True
             self.case(is_true(V('pol_change')),C(True))
-            self.default(C(False))
         @transition
         def policy(self):
         # If "infected" is True, change policy to "drop"
