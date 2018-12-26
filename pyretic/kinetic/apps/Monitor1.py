@@ -26,12 +26,12 @@ from pyretic.kinetic.apps.mac_learner import *
 ### Define a class for the application, subclassed from DynamicPolicy
 class Monitor1(DynamicPolicy):
     count=0
-    v1=2
-    v2=7
-    m=10
-    rates=[0,v1,v2,m]
+
     def __init__(self):
-        Monitor1.count+=1
+        v1=2
+        v2=7
+        m=10
+        rates=[0,v1,v2,m]
     ### 1. DEFINE THE LPEC FUNCTION
         def lpec(f):
             return match(srcip=f['srcip'])
@@ -39,6 +39,7 @@ class Monitor1(DynamicPolicy):
     ### 2. SET UP TRANSITION FUNCTIONS
         @transition
         def counter(self):
+            Monitor1.count+=1
             pol_change=False
             if(Monitor1.count>=Monitor1.rates[2] and Monitor1.count<Monitor1.rates[3]):
                 pol_change=True
