@@ -26,10 +26,7 @@ from pyretic.kinetic.apps.mac_learner import *
 ### Define a class for the application, subclassed from DynamicPolicy
 class Monitor1(DynamicPolicy):
     count=0
-    v1=2
-    v2=7
-    m=10
-    rates=[0,v1,v2,m]
+    
     def __init__(self):
         v1=2
         v2=7
@@ -43,7 +40,9 @@ class Monitor1(DynamicPolicy):
         @transition
         def counter(self):
             Monitor1.count+=1
-            self.case(is_true((V('Monitor1.count')>=Monitor1.rates[2]) & (V('Monitor1.count')<Monitor1.rates[3])),C(True))
+            pol_change=False
+            if(Monitor1.count>=Monitor1.rates[2] and Monitor1.count<Monitor1.rates[3]):
+                pol_change=True
             self.case(is_true(V('pol_change')),C(True))
         @transition
         def policy(self):
