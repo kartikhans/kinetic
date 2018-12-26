@@ -29,12 +29,11 @@ class Monitor1(DynamicPolicy):
     v1=2
     v2=7
     m=10
-    rates=[0,v1,v2,m]
+    rates=range(m)
     def __init__(self):
         v1=2
         v2=7
         m=10
-        rates=[0,v1,v2,m]
     ### 1. DEFINE THE LPEC FUNCTION
         def lpec(f):
             return match(srcip=f['srcip'])
@@ -42,21 +41,19 @@ class Monitor1(DynamicPolicy):
     ### 2. SET UP TRANSITION FUNCTIONS
         @transition
         def counter(self):
-            Monitor1.count+=1
-            pol_change=False
-            if(Monitor1.count>=Monitor1.rates[2] and Monitor1.count<Monitor1.rates[3]):
-                pol_change=True
-            self.case(is_true(V('pol_change')),C(True))
+            for i in range(m):
+                self.case(V('counter')==C(i),C(i+1))
+            self.default(C(0))
         @transition
         def policy(self):
         # If "infected" is True, change policy to "drop"
-            self.case(is_true(V('counter')),C(drop))
+            self.case((V('counter')>=v2 & V('counter')<m),C(drop))
         # Default policy is "indentity", which is "allow".
             self.default(C(identity))
     ### 3. SET UP THE FSM DESCRIPTION
 
         self.fsm_def =FSMDef(
-                         counter=FSMVar(type=BoolType(),init=False,trans=counter),
+                         counter=FSMVar(type=Tyep(int,set(rates)),init=0,trans=counter),
                          policy=FSMVar(type=Type(Policy,{drop,identity}),
                                        init=identity,
                                        trans=policy))
