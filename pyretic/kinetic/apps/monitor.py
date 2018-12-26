@@ -58,7 +58,7 @@ class monitor(DynamicPolicy):
         fsm_pol = FSMPolicy(lpec,self.fsm_def)
         json_event = JSONEvent()
         json_event.register_callback(fsm_pol.event_handler)
-        super(Monitor1,self).__init__(fsm_pol)
+        super(monitor,self).__init__(fsm_pol)
 def main():
 
     # DynamicPolicy that is going to be returned
