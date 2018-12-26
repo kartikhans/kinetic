@@ -75,12 +75,12 @@ def main():
     ## Add specs
     mc.add_spec("FAIRNESS\n  counter;")
     ### If infected event is true, next policy state is 'drop'
-    mc.add_spec("SPEC AG (V(counter)>=rates[2] and V(counter)<rates[3]) -> AX policy=drop)")
+    mc.add_spec("SPEC AG (counter -> AX policy=drop)")
     ### If infected event is false, next policy state is 'allow'
-    mc.add_spec("SPEC AG (V(counter)>=0 and V(counter)<=rates[2] -> AX policy=policy_1)")
+    mc.add_spec("SPEC AG (!counter -> AX policy=policy_1)")
 
     ### Policy state is 'allow' until infected is true.
-    mc.add_spec("SPEC A [ policy=policy_1 U (V(counter)>=rates[2] and V(counter)<rates[3]) ]")
+    mc.add_spec("SPEC A [ policy=policy_1 U counter ]")
 
     ### It is always possible to go back to 'allow'
     mc.add_spec("SPEC AG EF policy=policy_1")
