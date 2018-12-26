@@ -4,88 +4,95 @@ from pyretic.lib.std import *
 from pyretic.kinetic.fsm_policy import *
 from pyretic.kinetic.drivers.json_event import JSONEvent
 from pyretic.kinetic.smv.model_checker import *
-from pyretic.lib.query import *
-import shlex, subprocess
+from pyretic.kinetic.util.rewriting import *
+from pyretic.kinetic.apps.mac_learner import *
+#####################################################################################################
+# * App launch
+#   - pyretic.py pyretic.kinetic.apps.ids
+#
+# * Mininet Generation (in "~/pyretic/pyretic/kinetic" directory)
+#   - sudo mn --controller=remote,ip=127.0.0.1 --mac --arp --switch ovsk --link=tc --topo=single,3
+#
+# * Start ping from h1 to h2
+#   - mininet> h1 ping h2
+#
+# * Events to block traffic "h1 ping h2" (in "~/pyretic/pyretic/kinetic" directory)
+#   - python json_sender.py -n infected -l True --flow="{srcip=10.0.0.1}" -a 127.0.0.1 -p 50001
+#
+# * Events to again allow traffic "h1 ping h2" (in "~/pyretic/pyretic/kinetic" directory)
+#   - python json_sender.py -n infected -l False --flow="{srcip=10.0.0.1}" -a 127.0.0.1 -p 50001
+#####################################################################################################
 
-
-
-BASE_CMD = 'python /home/mininet/pyretic/pyretic/kinetic/json_sender.py -n rate -l'
-
-BYTES_FOR_RATE2 = 5000
-BYTES_FOR_RATE3 = 10000
-
+### Define a class for the application, subclassed from DynamicPolicy
 class monitor(DynamicPolicy):
-    def __init__(self,port=50001):
-
-        self.q = count_bytes(1,['srcip','dstip'])
-        self.set_rate_2 = False
-        self.set_rate_3 = False
-
-        def packet_count_printer(counts):
-            print '==== Count Bytes===='
-            print str(counts) + '\n'
-
-            for m in counts:
-                idx = str(m).find('srcip')
-                idx2 = str(m).find('dstip')
-                sip = str(m)[idx:idx2].lstrip("srcip', ").rstrip(") ('")
-                dip = str(m)[idx2:].lstrip("dstip', ").rstrip(")")
-
-                if counts[m] > BYTES_FOR_RATE2 and BYTES_FOR_RATE3 > counts[m] and self.set_rate_2 is False:
-                    cmd = BASE_CMD + ' 2 --flow="{srcip=' + sip +',dstip='+dip+'}" -a 127.0.0.1 -p ' + str(port)
-                    p1 = subprocess.Popen([cmd], shell=True)
-                    p1.communicate()
-                    self.set_rate_2 = True
-                elif counts[m] > BYTES_FOR_RATE3 and self.set_rate_3 is False:
-                    cmd = BASE_CMD + ' 3 --flow="{srcip=' + sip +',dstip='+dip+'}" -a 127.0.0.1 -p ' + str(port)
-                    p1 = subprocess.Popen([cmd], shell=True)
-                    p1.communicate()
-                    self.set_rate_3 = True
-
-        def monitoring():
-            return self.q + passthrough
-
-       ### DEFINE THE LPEC FUNCTION
-
+    count=0
+    v1=2
+    v2=7
+    m=10
+    rates=range(m)
+    def __init__(self):
+        v1=2
+        v2=7
+        m=10
+    ### 1. DEFINE THE LPEC FUNCTION
         def lpec(f):
             return match(srcip=f['srcip'])
 
-        ## SET UP TRANSITION FUNCTIONS
-
+    ### 2. SET UP TRANSITION FUNCTIONS
         @transition
-        def mon(self):
-            self.case(occurred(self.event),self.event)
-
+        def counter(self):
+            for i in range(m):
+                self.case(V('counter')==C(i),C(i+1))
+            self.default(C(0))
         @transition
-        def policy_trans(self):
-            self.case(is_true(V('monitor')),C(monitoring()))
+        def policy(self):
+        # If "infected" is True, change policy to "drop"
+            self.case((V('counter')>=v2),C(drop))
+        # Default policy is "indentity", which is "allow".
             self.default(C(identity))
+    ### 3. SET UP THE FSM DESCRIPTION
 
-        ### SET UP THE FSM DESCRIPTION
-
-        self.fsm_def = FSMDef(
-            monitor=FSMVar(type=BoolType(),
-                             init=False,
-                             trans=mon),
-            policy=FSMVar(type=Type(Policy,set([identity,monitoring()])),
-                           init=monitoring(),
-                           trans=policy_trans))
-
-
-        ### Set up monitoring
-        self.q.register_callback(packet_count_printer)
-
-
-        ### SET UP POLICY AND EVENT STREAMS
-
+        self.fsm_def =FSMDef(
+                         counter=FSMVar(type=Tyep(int,set(rates)),init=0,trans=counter),
+                         policy=FSMVar(type=Type(Policy,{drop,identity}),
+                                       init=identity,
+                                       trans=policy))
+        ### 4. SET UP POLICY AND EVENT STREAMS
         fsm_pol = FSMPolicy(lpec,self.fsm_def)
         json_event = JSONEvent()
         json_event.register_callback(fsm_pol.event_handler)
-
-        super(monitor,self).__init__(fsm_pol)
-
-
+        super(Monitor1,self).__init__(fsm_pol)
 def main():
+
+    # DynamicPolicy that is going to be returned
     pol = monitor()
 
-    return pol
+    # For NuSMV
+    smv_str = fsm_def_to_smv_model(pol.fsm_def)
+    mc = ModelChecker(smv_str, 'monitor')
+
+    ## Add specs
+    mc.add_spec("FAIRNESS\n  counter;")
+    ### If infected event is true, next policy state is 'drop'
+    mc.add_spec("SPEC AG (counter>=v2 & counter<m -> AX policy=drop)")
+    ### If infected event is false, next policy state is 'allow'
+    mc.add_spec("SPEC AG (counter>=0 & counter<v2 -> AX policy=policy_1)")
+
+    ### Policy state is 'allow' until infected is true.
+    mc.add_spec("SPEC A [ policy=policy_1 U (counter>=v2 and counter<m) ]")
+
+    ### It is always possible to go back to 'allow'
+    mc.add_spec("SPEC AG EF policy=policy_1")
+
+    # Save NuSMV file
+    mc.save_as_smv_file()
+
+    # Verify
+    mc.verify()
+
+    # Ask deployment
+    ask_deploy()
+
+    # Return DynamicPolicy.
+    # flood() will take for of forwarding for this simple example.
+    return pol >> flood()
