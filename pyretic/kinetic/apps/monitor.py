@@ -30,7 +30,6 @@ class monitor(DynamicPolicy):
         v2=7
         m=10
         rates=range(m)
-
     ### 1. DEFINE THE LPEC FUNCTION
         def lpec(f):
             return match(srcip=f['srcip'])
@@ -44,7 +43,7 @@ class monitor(DynamicPolicy):
         @transition
         def policy(self):
         # If "infected" is True, change policy to "drop"
-            self.case((V('counter')>=v2),C(drop))
+            self.case((V('counter')>=v2 & V('counter')<m),C(drop))
         # Default policy is "indentity", which is "allow".
             self.default(C(identity))
     ### 3. SET UP THE FSM DESCRIPTION
