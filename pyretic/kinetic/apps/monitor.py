@@ -25,12 +25,8 @@ from pyretic.kinetic.apps.mac_learner import *
 
 ### Define a class for the application, subclassed from DynamicPolicy
 class monitor(DynamicPolicy):
-    count=0
-    v1=2
-    v2=7
-    m=10
-    rates=range(m)
     def __init__(self):
+        count =0
         v1=2
         v2=7
         m=10
@@ -73,7 +69,6 @@ def main():
     mc = ModelChecker(smv_str, 'monitor')
 
     ## Add specs
-    mc.add_spec("FAIRNESS\n  counter;")
     ### If infected event is true, next policy state is 'drop'
     mc.add_spec("SPEC AG (rate>=v2 & rate<m -> AX policy=drop)")
     ### If infected event is false, next policy state is 'allow'
