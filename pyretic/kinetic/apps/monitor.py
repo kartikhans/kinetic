@@ -53,7 +53,7 @@ class monitor(DynamicPolicy):
     ### 3. SET UP THE FSM DESCRIPTION
 
         self.fsm_def =FSMDef(
-                         counter=FSMVar(type=Tyep(int,set(rates)),init=0,trans=counter),
+                         counter=FSMVar(type=Type(int,set(rates)),init=0,trans=counter),
                          policy=FSMVar(type=Type(Policy,{drop,identity}),
                                        init=identity,
                                        trans=policy))
