@@ -74,10 +74,7 @@ def main():
     mc.add_spec("SPEC AG (counter < v2 -> AX policy=policy_2)")
 
     ### Policy state is 'allow' until infected is true.
-    mc.add_spec("SPEC A [ policy=policy_1 U (counter>=v2 & counter<m) ]")
-    mc.add_spec("SPEC AG (EF policy=policy_1)")
-    mc.add_spec("SPEC policy=policy_1 -> EX policy=policy_1")
-    mc.add_spec("SPEC AG (policy=policy_1 -> EF policy=policy_2)")
+    mc.add_spec("SPEC A [ policy=policy_1 U (counter<m) ]")
 
     ### It is always possible to go back to 'allow'
     mc.add_spec("SPEC AG EF policy=policy_2")
