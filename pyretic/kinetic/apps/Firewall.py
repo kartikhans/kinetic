@@ -89,11 +89,11 @@ class Firewall(DynamicPolicy):
                                            trans=policy))
 
 
-        fsm_pol = FSMPolicy(lpec,self.fsm_def)
-        json_event = JSONEvent()
-        json_event.register_callback(fsm_pol.event_handler)
+                fsm_pol = FSMPolicy(lpec,self.fsm_def)
+                json_event = JSONEvent()
+                json_event.register_callback(fsm_pol.event_handler)
 
-        super(Firewall,self).__init__(fsm_pol)
+                super(Firewall,self).__init__(fsm_pol)
 
 
 def main():
