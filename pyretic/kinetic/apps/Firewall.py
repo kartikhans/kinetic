@@ -76,8 +76,6 @@ class Firewall(DynamicPolicy):
         json_event = JSONEvent()
         json_event.register_callback(fsm_pol.event_handler)
         ### This part pretty much remains same for any application
-
-        # Specify application class name here. (e.g., "ids")
         super(Firewall,self).__init__(fsm_pol)
 
 
