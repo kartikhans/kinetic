@@ -65,6 +65,8 @@ class Firewall(DynamicPolicy):
         def policy(self):
             self.case(is_True(V('R1')) | is_True(V('R3')),C(drop))
             self.default(C(identity))
+    ### 3. SET UP THE FSM DESCRIPTION
+
         self.fsm_def =FSMDef(
                              R0=FSMVar(type=BoolType(),
                                         init=False,
@@ -87,6 +89,7 @@ class Firewall(DynamicPolicy):
                              policy=FSMVar(type=Type(policy,{drop,identity}),
                                            init=identity,
                                            trans=policy))
+        ### 4. SET UP POLICY AND EVENT STREAMS
 
 
                 fsm_pol = FSMPolicy(lpec,self.fsm_def)
