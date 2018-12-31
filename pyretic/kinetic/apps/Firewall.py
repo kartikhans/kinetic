@@ -80,7 +80,7 @@ class Firewall(DynamicPolicy):
         ### This part pretty much remains same for any application
 
         # Specify application class name here. (e.g., "ids")
-        super(ids,self).__init__(fsm_pol)
+        super(Firewall,self).__init__(fsm_pol)
 
 
 def main():
