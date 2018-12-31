@@ -69,16 +69,18 @@ class Firewall(DynamicPolicy):
                              R5=FSMVar(type=BoolType(),init=False,trans=R5),
                              policy=FSMVar(type=Type(policy,{drop,identity}),
                                            init=identity,
-                                           trans=policy))
+                                           trans=policy)),
 
-                ### SET UP POLICY AND EVENT STREAMS
+        ### 4. SET UP POLICY AND EVENT STREAMS
 
-                fsm_pol = FSMPolicy(lpec,self.fsm_def)
-                json_event = JSONEvent()
-                json_event.register_callback(fsm_pol.event_handler)
+        ### This part pretty much remains same for any application
+        fsm_pol = FSMPolicy(lpec,self.fsm_def)
+        json_event = JSONEvent()
+        json_event.register_callback(fsm_pol.event_handler)
+        ### This part pretty much remains same for any application
 
-                super(Firewall,self).__init__(fsm_pol)
-
+        # Specify application class name here. (e.g., "ids")
+        super(ids,self).__init__(fsm_pol)
 
 
 def main():
