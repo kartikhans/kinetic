@@ -37,13 +37,13 @@ class monitor(DynamicPolicy):
     ### 2. SET UP TRANSITION FUNCTIONS
         @transition
         def counter(self):
-            for i in range(m):
+            for i in rates:
                 self.case(V('counter')==C(i),C(i+1))
             self.default(C(0))
         @transition
         def policy(self):
         # If "infected" is True, change policy to "drop"
-            self.case(((V('counter')>=v2) & (V('counter')<m)),C(drop))
+            self.case(((V('counter')>=C(v2)) & (V('counter')<C(m))),C(drop))
         # Default policy is "indentity", which is "allow".
             self.default(C(identity))
     ### 3. SET UP THE FSM DESCRIPTION
@@ -68,17 +68,17 @@ def main():
     mc = ModelChecker(smv_str, 'monitor')
 
     ## Add specs
-    mc.add_spec("FAIRNESS\n  counter<v2;")
+    mc.add_spec("FAIRNESS\n  counter >= v2;")
     ### If infected event is true, next policy state is 'drop'
-    mc.add_spec("SPEC AG (counter >= v2 -> AX policy=drop)")
+    mc.add_spec("SPEC AG counter >= v2 -> AX policy=drop")
     ### If infected event is false, next policy state is 'allow'
-    mc.add_spec("SPEC AG (counter < v2 -> AX policy=policy_2)")
+    mc.add_spec("SPEC AG (counter < v2 -> AX policy=identity)")
 
     ### Policy state is 'allow' until infected is true.
-    mc.add_spec("SPEC A [ policy=policy_1 U counter < m ]")
+    mc.add_spec("SPEC A [ policy=indentity U counter > m ]")
 
     ### It is always possible to go back to 'allow'
-    mc.add_spec("SPEC AG EF policy=policy_2")
+    mc.add_spec("SPEC AG EF policy=identity")
 
     # Save NuSMV file
     mc.save_as_smv_file()

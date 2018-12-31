@@ -11,7 +11,6 @@ from pyretic.kinetic.apps.mac_learner import *
 from pyretic.kinetic.apps.monitor import *
 
 
-
 #####################################################################################################
 # * App launch
 #   - pyretic.py pyretic.kinetic.apps.rate_limiter
