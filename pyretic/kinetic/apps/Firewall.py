@@ -1,11 +1,12 @@
+
 from pyretic.lib.corelib import *
 from pyretic.lib.std import *
 
 from pyretic.kinetic.fsm_policy import *
 from pyretic.kinetic.drivers.json_event import JSONEvent
 from pyretic.kinetic.smv.model_checker import *
-
-
+from pyretic.kinetic.util.rewriting import *
+from pyretic.kinetic.apps.mac_learner import *
 
 #####################################################################################################
 # * App launch
@@ -27,9 +28,9 @@ from pyretic.kinetic.smv.model_checker import *
 ### Define a class for the application, subclassed from DynamicPolicy
 class Firewall(DynamicPolicy):
     def __init__(self):
-        
+
         ### 1. DEFINE THE LPEC FUNCTION
-        
+
         def lpec(f):
             # Packets with same source IP
             #  will have a same "state" (thus, same policy applied).
@@ -54,7 +55,7 @@ class Firewall(DynamicPolicy):
         def R5(self):
             # If True, return True. If False, return False.
             self.case(occured(self.event),self.event)
-        
+
         def policy(self):
             self.case(is_True(V('R1')) | is_True(V('R3')),C(drop))
             self.default(C(identity))
@@ -70,13 +71,13 @@ class Firewall(DynamicPolicy):
                                            trans=policy))
 
 def main():
-    
+
     # DynamicPolicy that is going to be returned
     pol = Firewall()
     # For NuSMV
     smv_str = fsm_def_to_smv_model(pol.fsm_def)
     mc = ModelChecker(smv_str,'Firewall')
-    
+
     ## Add specs
     mc.add_spec("FAIRNESS\n  R0;")
     mc.add_spec("FAIRNESS\n  R1;")
@@ -92,16 +93,16 @@ def main():
     mc.add_spec("SPEC A [ policy=policy_2 U R1 | R3 ]")
     ### It is always possible to go back to 'allow'
     mc.add_spec("SPEC AG EF policy=policy_2")
-    
+
     # Save NuSMV file
     mc.save_as_smv_file()
-    
+
     # Verify
     mc.verify()
-    
+
     # Ask deployment
     ask_deploy()
-    
+
     # Return DynamicPolicy.
     # flood() will take for of forwarding for this simple example.
     return pol >> flood()
