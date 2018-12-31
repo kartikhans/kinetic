@@ -66,23 +66,34 @@ class Firewall(DynamicPolicy):
             self.case(is_True(V('R1')) | is_True(V('R3')),C(drop))
             self.default(C(identity))
         self.fsm_def =FSMDef(
-                             R0=FSMVar(type=BoolType(),init=False,trans=R0),
-                             R1=FSMVar(type=BoolType(),init=False,trans=R1),
-                             R2=FSMVar(type=BoolType(),init=False,trans=R2),
-                             R3=FSMVar(type=BoolType(),init=False,trans=R3),
-                             R4=FSMVar(type=BoolType(),init=False,trans=R4),
-                             R5=FSMVar(type=BoolType(),init=False,trans=R5),
+                             R0=FSMVar(type=BoolType(),
+                                        init=False,
+                                        trans=R0),
+                             R1=FSMVar(type=BoolType(),
+                                        init=False,
+                                        trans=R1),
+                             R2=FSMVar(type=BoolType(),
+                                        init=False,
+                                        trans=R2),
+                             R3=FSMVar(type=BoolType(),
+                                        init=False,
+                                        trans=R3),
+                             R4=FSMVar(type=BoolType(),
+                                        init=False,
+                                        trans=R4),
+                             R5=FSMVar(type=BoolType(),
+                                        init=False,
+                                        trans=R5),
                              policy=FSMVar(type=Type(policy,{drop,identity}),
                                            init=identity,
                                            trans=policy))
 
-        ### This part pretty much remains same for any application
+
         fsm_pol = FSMPolicy(lpec,self.fsm_def)
         json_event = JSONEvent()
         json_event.register_callback(fsm_pol.event_handler)
-        ### This part pretty much remains same for any application
-        super(Firewall,self).__init__(fsm_pol)
 
+        super(Firewall,self).__init__(fsm_pol)
 
 
 def main():
