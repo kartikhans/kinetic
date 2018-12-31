@@ -15,7 +15,7 @@ from pyretic.kinetic.apps.mac_learner import *
 # * Mininet Generation (in "~/pyretic/pyretic/kinetic" directory)
 #   - sudo mn --controller=remote,ip=127.0.0.1 --mac --arp --switch ovsk --link=tc --topo=single,3
 #
-# * Start ping from h1 to h2 
+# * Start ping from h1 to h2
 #   - mininet> h1 ping h2
 #
 # * Send Event to block traffic "h1 ping h2" (in "~/pyretic/pyretic/kinetic" directory)
@@ -55,25 +55,25 @@ class gardenwall(DynamicPolicy):
 
         @transition
         def policy(self):
-            # If exempt, redirect to gardenwall. 
+            # If exempt, redirect to gardenwall.
             #  - rewrite dstip to 10.0.0.3
             self.case(is_true(V('infected')) & is_true(V('exempt')),C(redirectToGardenWall()))
 
             # If infected, drop
             self.case(is_true(V('infected')) ,C(drop))
 
-            # Else, identity    
+            # Else, identity
             self.default(C(identity))
 
 
         ### SET UP THE FSM DESCRIPTION
 
         self.fsm_def = FSMDef(
-            infected=FSMVar(type=BoolType(), 
-                            init=False, 
+            infected=FSMVar(type=BoolType(),
+                            init=False,
                             trans=infected),
-            exempt=FSMVar(type=BoolType(), 
-                            init=False, 
+            exempt=FSMVar(type=BoolType(),
+                            init=False,
                             trans=exempt),
             policy=FSMVar(type=Type(Policy,{drop,identity,redirectToGardenWall()}),
                           init=identity,
@@ -93,7 +93,7 @@ def main():
 
     # For NuSMV
     smv_str = fsm_def_to_smv_model(pol.fsm_def)
-    mc = ModelChecker(smv_str,'gardenwall')  
+    mc = ModelChecker(smv_str,'gardenwall')
 
     ## Add specs
     mc.add_spec("FAIRNESS\n  infected;")

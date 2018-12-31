@@ -41,22 +41,27 @@ class Firewall(DynamicPolicy):
         def R0(self):
             # If True, return True. If False, return False.
             self.case(occured(self.event),self.event)
+        @transition
         def R1(self):
             # If True, return True. If False, return False.
             self.case(occured(self.event),self.event)
+        @transition
         def R2(self):
             # If True, return True. If False, return False.
             self.case(occured(self.event),self.event)
+        @transition
         def R3(self):
             # If True, return True. If False, return False.
             self.case(occured(self.event),self.event)
+        @transition
         def R4(self):
             # If True, return True. If False, return False.
             self.case(occured(self.event),self.event)
+        @transition
         def R5(self):
             # If True, return True. If False, return False.
             self.case(occured(self.event),self.event)
-
+        @transition
         def policy(self):
             self.case(is_True(V('R1')) | is_True(V('R3')),C(drop))
             self.default(C(identity))
