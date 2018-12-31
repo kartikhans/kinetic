@@ -91,10 +91,11 @@ def main():
     mc.add_spec("FAIRNESS\n  R3;")
 
     # Now, traffic is dropped only when exempt is false and infected is true
-    mc.add_spec("SPEC AG (R1 or R3 -> AX policy=policy_1)")
-
+    mc.add_spec("SPEC AG (R1 -> AX policy=drop)")
+    mc.add_spec("SPEC AG (R3 -> AX policy=drop)")
     # If infected is false, next policy state is always 'allow'
-    mc.add_spec("SPEC AG (!R1 or !R3 -> AX policy=policy_2)")
+    mc.add_spec("SPEC AG (!R1 -> AX policy=identity)")
+    mc.add_spec("SPEC AG (!R3 -> AX policy=identity)")
 
     ### Policy state is 'allow' until infected is true.
     mc.add_spec("SPEC A [ policy=policy_2 U (R1 or R3) ]")
