@@ -14,7 +14,7 @@ from pyretic.kinetic.smv.model_checker import *
 # * Mininet Generation (in "~/pyretic/pyretic/kinetic" directory)
 #   - sudo mn --controller=remote,ip=127.0.0.1 --mac --arp --switch ovsk --link=tc --topo=single,3
 #
-# * Start ping from h1 to h2 
+# * Start ping from h1 to h2
 #   - mininet> h1 ping h2
 #
 # * Events to block traffic "h1 ping h2" (in "~/pyretic/pyretic/kinetic" directory)
@@ -31,7 +31,7 @@ class ids(DynamicPolicy):
         ### 1. DEFINE THE LPEC FUNCTION
 
         def lpec(f):
-            # Packets with same source IP 
+            # Packets with same source IP
             #  will have a same "state" (thus, same policy applied).
             return match(srcip=f['srcip'])
 
@@ -40,7 +40,7 @@ class ids(DynamicPolicy):
 
         @transition
         def infected(self):
-            # Return the variable's own value. 
+            # Return the variable's own value.
             # If True, return True. If False, return False.
             self.case(occurred(self.event),self.event)
 
@@ -56,8 +56,8 @@ class ids(DynamicPolicy):
         ### 3. SET UP THE FSM DESCRIPTION
 
         self.fsm_def = FSMDef(
-            infected=FSMVar(type=BoolType(), 
-                            init=False, 
+            infected=FSMVar(type=BoolType(),
+                            init=False,
                             trans=infected),
             policy=FSMVar(type=Type(Policy,{drop,identity}),
                           init=identity,
@@ -67,7 +67,7 @@ class ids(DynamicPolicy):
         ### 4. SET UP POLICY AND EVENT STREAMS
 
         ### This part pretty much remains same for any application
-        fsm_pol = FSMPolicy(lpec,self.fsm_def)
+    fsm_pol = FSMPolicy(lpec,self.fsm_def)
         json_event = JSONEvent()
         json_event.register_callback(fsm_pol.event_handler)
         ### This part pretty much remains same for any application
@@ -83,7 +83,7 @@ def main():
 
     # For NuSMV
     smv_str = fsm_def_to_smv_model(pol.fsm_def)
-    mc = ModelChecker(smv_str,'ids')  
+    mc = ModelChecker(smv_str,'ids')
 
     ## Add specs
     mc.add_spec("FAIRNESS\n  infected;")
@@ -109,6 +109,6 @@ def main():
     # Ask deployment
     ask_deploy()
 
-    # Return DynamicPolicy. 
+    # Return DynamicPolicy.
     # flood() will take for of forwarding for this simple example.
     return pol >> flood()
