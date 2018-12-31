@@ -5,8 +5,6 @@ from pyretic.lib.std import *
 from pyretic.kinetic.fsm_policy import *
 from pyretic.kinetic.drivers.json_event import JSONEvent
 from pyretic.kinetic.smv.model_checker import *
-from pyretic.kinetic.util.rewriting import *
-from pyretic.kinetic.apps.mac_learner import *
 
 #####################################################################################################
 # * App launch
@@ -89,14 +87,13 @@ class Firewall(DynamicPolicy):
                              policy=FSMVar(type=Type(policy,{drop,identity}),
                                            init=identity,
                                            trans=policy))
-        ### 4. SET UP POLICY AND EVENT STREAMS
+        ### SET UP POLICY AND EVENT STREAMS
 
+        fsm_pol = FSMPolicy(lpec,self.fsm_def)
+        json_event = JSONEvent()
+        json_event.register_callback(fsm_pol.event_handler)
 
-                fsm_pol = FSMPolicy(lpec,self.fsm_def)
-                json_event = JSONEvent()
-                json_event.register_callback(fsm_pol.event_handler)
-
-                super(Firewall,self).__init__(fsm_pol)
+        super(Firewall,self).__init__(fsm_pol)
 
 
 def main():
