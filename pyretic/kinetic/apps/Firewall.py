@@ -51,7 +51,7 @@ class Firewall(DynamicPolicy):
             # If exempt, redirect to gardenwall.
             #  - rewrite dstip to 10.0.0.3
             # If infected, drop
-            self.case(is_true(V('R1') | is_true(V('R3'))) ,C(drop))
+            self.case(is_true(V('R1')) | is_true(V('R3')) ,C(drop))
 
             # Else, identity
             self.default(C(identity))
