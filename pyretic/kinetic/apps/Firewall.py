@@ -58,13 +58,13 @@ class Firewall(DynamicPolicy):
         def policy(self):
             self.case(is_True(V('R1')) | is_True(V('R3')),C(drop))
             self.default(C(identity))
-        self.fsm_def =FSMDef(
-                             R0=FSMVar(type=BoolType(),inti=False,Trans=R0),
-                             R1=FSMVar(type=BoolType(),init=False,Trans=R1),
-                             R2=FSMVar(type=BoolType(),init=False,Trans=R2),
-                             R3=FSMVar(type=BoolType(),init=False,Trans=R3),
-                             R4=FSMVar(type=BoolType(),init=False,Trans=R4),
-                             R5=FSMVar(type=BoolType(),init=False,Trans=R5),
+        self.fsm_def = FSMDef(
+                             R0=FSMVar(type=BoolType(),init=False,trans=R0),
+                             R1=FSMVar(type=BoolType(),init=False,trans=R1),
+                             R2=FSMVar(type=BoolType(),init=False,trans=R2),
+                             R3=FSMVar(type=BoolType(),init=False,trans=R3),
+                             R4=FSMVar(type=BoolType(),init=False,trans=R4),
+                             R5=FSMVar(type=BoolType(),init=False,trans=R5),
                              policy=FSMVar(type=Type(policy,{drop,identity}),
                                            init=identity,
                                            trans=policy))
