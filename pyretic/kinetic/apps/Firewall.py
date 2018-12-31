@@ -51,7 +51,7 @@ class Firewall(DynamicPolicy):
             # If exempt, redirect to gardenwall.
             #  - rewrite dstip to 10.0.0.3
             # If infected, drop
-            self.case(is_true(V('R1')) | is_true(V('R3')) ,C(drop))
+            self.case(is_true(V('R1')) or is_true(V('R3')) ,C(drop))
 
             # Else, identity
             self.default(C(identity))
@@ -91,13 +91,13 @@ def main():
     mc.add_spec("FAIRNESS\n  R3;")
 
     # Now, traffic is dropped only when exempt is false and infected is true
-    mc.add_spec("SPEC AG (R1 | R3 -> AX policy=policy_1)")
+    mc.add_spec("SPEC AG (R1 or R3 -> AX policy=policy_1)")
 
     # If infected is false, next policy state is always 'allow'
-    mc.add_spec("SPEC AG (!R1 | !R3 -> AX policy=policy_2)")
+    mc.add_spec("SPEC AG (!R1 or !R3 -> AX policy=policy_2)")
 
     ### Policy state is 'allow' until infected is true.
-    mc.add_spec("SPEC A [ policy=policy_2 U (R1 | R3) ]")
+    mc.add_spec("SPEC A [ policy=policy_2 U (R1 or R3) ]")
 
     # Save NuSMV file
     mc.save_as_smv_file()
