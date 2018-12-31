@@ -32,12 +32,6 @@ from pyretic.kinetic.apps.mac_learner import *
 class Firewall(DynamicPolicy):
     def __init__(self):
 
-        # Garden Wall
-        def redirectToGardenWall():
-            client_ips = [IP('10.0.0.1'), IP('10.0.0.2')]
-            rewrite_policy = rewriteDstIPAndMAC(client_ips, '10.0.0.3')
-            return rewrite_policy
-
         ### DEFINE THE LPEC FUNCTION
 
         def lpec(f):
@@ -45,24 +39,19 @@ class Firewall(DynamicPolicy):
 
         ## SET UP TRANSITION FUNCTIONS
         @transition
-        def R0(self):
-            self.case(occured(self.event),self.event)
-        @transition
-        def exempt(self):
+        def R1(self):
             self.case(occurred(self.event),self.event)
 
         @transition
-        def infected(self):
+        def R3(self):
             self.case(occurred(self.event),self.event)
 
         @transition
         def policy(self):
             # If exempt, redirect to gardenwall.
             #  - rewrite dstip to 10.0.0.3
-            self.case(is_true(V('infected')) & is_true(V('exempt')),C(redirectToGardenWall()))
-
             # If infected, drop
-            self.case(is_true(V('infected')) ,C(drop))
+            self.case(is_true(V('R1') | is_true(V('R3'))) ,C(drop))
 
             # Else, identity
             self.default(C(identity))
@@ -71,16 +60,13 @@ class Firewall(DynamicPolicy):
         ### SET UP THE FSM DESCRIPTION
 
         self.fsm_def = FSMDef(
-            R0=FSMVar(type=BoolType(),
-                        init=False,
-                        trans=R0),
-            infected=FSMVar(type=BoolType(),
+            R1=FSMVar(type=BoolType(),
                             init=False,
-                            trans=infected),
-            exempt=FSMVar(type=BoolType(),
+                            trans=R1),
+            R3=FSMVar(type=BoolType(),
                             init=False,
-                            trans=exempt),
-            policy=FSMVar(type=Type(Policy,{drop,identity,redirectToGardenWall()}),
+                            trans=R3),
+            policy=FSMVar(type=Type(Policy,{drop,identity}),
                           init=identity,
                           trans=policy))
 
@@ -101,20 +87,17 @@ def main():
     mc = ModelChecker(smv_str,'Firewall')
 
     ## Add specs
-    mc.add_spec("FAIRNESS\n  infected;")
-    mc.add_spec("FAIRNESS\n  exempt;")
+    mc.add_spec("FAIRNESS\n  R1;")
+    mc.add_spec("FAIRNESS\n  R3;")
 
     # Now, traffic is dropped only when exempt is false and infected is true
-    mc.add_spec("SPEC AG (infected & !exempt -> AX policy=policy_1)")
-
-    # If exempt is true, next policy state to redirect to gardenwall, even if infected
-    mc.add_spec("SPEC AG (infected & exempt -> AX policy=policy_3)")
+    mc.add_spec("SPEC AG (R1 | R3 -> AX policy=policy_1)")
 
     # If infected is false, next policy state is always 'allow'
-    mc.add_spec("SPEC AG (!infected -> AX policy=policy_2)")
+    mc.add_spec("SPEC AG (!R1 & !R3 -> AX policy=policy_2)")
 
     ### Policy state is 'allow' until infected is true.
-    mc.add_spec("SPEC A [ policy=policy_2 U infected ]")
+    mc.add_spec("SPEC A [ policy=policy_2 U (R1 | R3) ]")
 
     # Save NuSMV file
     mc.save_as_smv_file()
