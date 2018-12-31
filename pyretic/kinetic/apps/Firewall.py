@@ -37,7 +37,6 @@ class Firewall(DynamicPolicy):
         ### 2. SET UP TRANSITION FUNCTIONS
         @transition
         def R0(self):
-            # If True, return True. If False, return False.
             self.case(occured(self.event),self.event)
         @transition
         def R1(self):
