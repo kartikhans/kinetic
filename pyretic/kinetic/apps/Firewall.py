@@ -36,6 +36,7 @@ class Firewall(DynamicPolicy):
             #  will have a same "state" (thus, same policy applied).
             return match(srcip=f['srcip'])
         ### 2. SET UP TRANSITION FUNCTIONS
+
         @transition
         def R0(self):
             # If True, return True. If False, return False.
@@ -60,7 +61,7 @@ class Firewall(DynamicPolicy):
             self.case(is_True(V('R1')) | is_True(V('R3')),C(drop))
             self.default(C(identity))
         self.fsm_def =FSMDef(
-                             R0=FSMVar(type=BoolType(),inti=False,Trans=R0),
+                             R0=FSMVar(type=BoolType(),init=False,Trans=R0),
                              R1=FSMVar(type=BoolType(),init=False,Trans=R1),
                              R2=FSMVar(type=BoolType(),init=False,Trans=R2),
                              R3=FSMVar(type=BoolType(),init=False,Trans=R3),
