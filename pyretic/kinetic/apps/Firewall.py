@@ -1,10 +1,11 @@
-
 from pyretic.lib.corelib import *
 from pyretic.lib.std import *
 
 from pyretic.kinetic.fsm_policy import *
 from pyretic.kinetic.drivers.json_event import JSONEvent
 from pyretic.kinetic.smv.model_checker import *
+
+
 
 #####################################################################################################
 # * App launch
@@ -34,56 +35,36 @@ class Firewall(DynamicPolicy):
             #  will have a same "state" (thus, same policy applied).
             return match(srcip=f['srcip'])
         ### 2. SET UP TRANSITION FUNCTIONS
-
         @transition
         def R0(self):
             # If True, return True. If False, return False.
             self.case(occured(self.event),self.event)
-        @transition
         def R1(self):
             # If True, return True. If False, return False.
             self.case(occured(self.event),self.event)
-        @transition
         def R2(self):
             # If True, return True. If False, return False.
             self.case(occured(self.event),self.event)
-        @transition
         def R3(self):
             # If True, return True. If False, return False.
             self.case(occured(self.event),self.event)
-        @transition
         def R4(self):
             # If True, return True. If False, return False.
             self.case(occured(self.event),self.event)
-        @transition
         def R5(self):
             # If True, return True. If False, return False.
             self.case(occured(self.event),self.event)
-        @transition
+
         def policy(self):
             self.case(is_True(V('R1')) | is_True(V('R3')),C(drop))
             self.default(C(identity))
-    ### 3. SET UP THE FSM DESCRIPTION
-
         self.fsm_def =FSMDef(
-                             R0=FSMVar(type=BoolType(),
-                                        init=False,
-                                        trans=R0),
-                             R1=FSMVar(type=BoolType(),
-                                        init=False,
-                                        trans=R1),
-                             R2=FSMVar(type=BoolType(),
-                                        init=False,
-                                        trans=R2),
-                             R3=FSMVar(type=BoolType(),
-                                        init=False,
-                                        trans=R3),
-                             R4=FSMVar(type=BoolType(),
-                                        init=False,
-                                        trans=R4),
-                             R5=FSMVar(type=BoolType(),
-                                        init=False,
-                                        trans=R5),
+                             R0=FSMVar(type=BoolType(),inti=False,Trans=R0),
+                             R1=FSMVar(type=BoolType(),init=False,Trans=R1),
+                             R2=FSMVar(type=BoolType(),init=False,Trans=R2),
+                             R3=FSMVar(type=BoolType(),init=False,Trans=R3),
+                             R4=FSMVar(type=BoolType(),init=False,Trans=R4),
+                             R5=FSMVar(type=BoolType(),init=False,Trans=R5),
                              policy=FSMVar(type=Type(policy,{drop,identity}),
                                            init=identity,
                                            trans=policy))
