@@ -98,7 +98,7 @@ def main():
     mc.add_spec("SPEC AG (!R3 -> AX policy=identity)")
 
     ### Policy state is 'allow' until infected is true.
-    mc.add_spec("SPEC A [ policy=policy_2 U (R1 or R3) ]")
+    mc.add_spec("SPEC A [ policy=policy_2 U (R1 | R3) ]")
 
     # Save NuSMV file
     mc.save_as_smv_file()
