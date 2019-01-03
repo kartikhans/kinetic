@@ -54,7 +54,7 @@ class Firewall(DynamicPolicy):
             self.case(occurred(self.event),self.event)
         @transition
         def R5(self):
-            self.case(occured(self.event),self.event)
+            self.case(occurred(self.event),self.event)
         @transition
         def infected(self):
             self.case(is_true(V('R1')) or is_true(V('R3')),C(True))
