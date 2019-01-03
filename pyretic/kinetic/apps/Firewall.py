@@ -38,12 +38,23 @@ class Firewall(DynamicPolicy):
 
         ## SET UP TRANSITION FUNCTIONS
         @transition
+        def R0(self):
+            self.case(occurred(self.event),self.event)
+        @transition
         def R1(self):
             self.case(occurred(self.event),self.event)
-
+        @transition
+        def R2(self):
+            self.case(occurred(self.event),self.event)
         @transition
         def R3(self):
             self.case(occurred(self.event),self.event)
+        @transition
+        def R4(self):
+            self.case(occurred(self.event),self.event)
+        @transition
+        def R5(self):
+            self.case(occured(self.event),self.event)
         @transition
         def infected(self):
             self.case(is_true(V('R1')) or is_true(V('R3')),C(True))
@@ -91,17 +102,22 @@ def main():
     mc = ModelChecker(smv_str,'Firewall')
 
     ## Add specs
+    mc.add_spec("FAIRNESS\n  R0;")
     mc.add_spec("FAIRNESS\n  R1;")
+    mc.add_spec("FAIRNESS\n  R2;")
     mc.add_spec("FAIRNESS\n  R3;")
+    mc.add_spec("FAIRNESS\n  R4;")
+    mc.add_spec("FAIRNESS\n  R5;")
     mc.add_spec("FAIRNESS\n  infected;")
     # Now, traffic is dropped only when exempt is false and infected is true
     mc.add_spec("SPEC AG (R1 -> AX policy=drop)")
     mc.add_spec("SPEC AG (R3 -> AX policy=drop)")
     mc.add_spec("SPEC AG (infected -> AX policy=drop)")
     # If infected is false, next policy state is always 'allow'
-    mc.add_spec("SPEC AG (!R1 -> AX policy=identity)")
-    mc.add_spec("SPEC AG (!R3 -> AX policy=identity)")
-    mc.add_spec("SPEC AG (!infected -> AX policy=identity)")
+    mc.add_spec("SPEC AG (R0 -> AX policy=identity)")
+    mc.add_spec("SPEC AG (R2 -> AX policy=identity)")
+    mc.add_spec("SPEC AG (R4 -> AX policy=identity)")
+    mc.add_spec("SPEC AG (R5 -> AX policy=identity)")
     ### Policy state is 'allow' until infected is true.
     mc.add_spec("SPEC A [ policy=policy_2 U infected ]")
 
