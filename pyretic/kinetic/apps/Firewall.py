@@ -31,7 +31,6 @@ from pyretic.kinetic.apps.mac_learner import *
 
 class Firewall(DynamicPolicy):
     def __init__(self):
-
         ### DEFINE THE LPEC FUNCTION
 
         def lpec(f):
@@ -45,14 +44,16 @@ class Firewall(DynamicPolicy):
         @transition
         def R3(self):
             self.case(occurred(self.event),self.event)
-
+        @transition
+        def infected(self):
+            self.case(is_true(V('R1')) or is_true(V('R3')),C(True))
+            self.defaul(C(False))
         @transition
         def policy(self):
             # If exempt, redirect to gardenwall.
             #  - rewrite dstip to 10.0.0.3
             # If infected, drop
-            self.case(is_true(V('R1')) or is_true(V('R3')) ,C(drop))
-
+            self.case(is_true(V('infected')) ,C(drop))
             # Else, identity
             self.default(C(identity))
 
@@ -66,6 +67,9 @@ class Firewall(DynamicPolicy):
             R3=FSMVar(type=BoolType(),
                             init=False,
                             trans=R3),
+            infected=FSMVar(type=BoolType(),
+                                init=False,
+                                trans=infected),
             policy=FSMVar(type=Type(Policy,{drop,identity}),
                           init=identity,
                           trans=policy))
@@ -89,16 +93,17 @@ def main():
     ## Add specs
     mc.add_spec("FAIRNESS\n  R1;")
     mc.add_spec("FAIRNESS\n  R3;")
-
+    mc.add_spec("FAIRNESS\n  infected;")
     # Now, traffic is dropped only when exempt is false and infected is true
     mc.add_spec("SPEC AG (R1 -> AX policy=drop)")
     mc.add_spec("SPEC AG (R3 -> AX policy=drop)")
+    mc.add_spec("SPEC AG (infected -> AX policy=drop)")
     # If infected is false, next policy state is always 'allow'
     mc.add_spec("SPEC AG (!R1 -> AX policy=identity)")
     mc.add_spec("SPEC AG (!R3 -> AX policy=identity)")
-
+    mc.add_spec("SPEC AG (!infected -> AX policy=identity)")
     ### Policy state is 'allow' until infected is true.
-    mc.add_spec("SPEC A [ policy=policy_2 U (R1 | R3) ]")
+    mc.add_spec("SPEC A [ policy=policy_2 U infected ]")
 
     # Save NuSMV file
     mc.save_as_smv_file()
