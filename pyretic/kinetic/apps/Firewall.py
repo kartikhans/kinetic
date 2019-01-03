@@ -47,7 +47,7 @@ class Firewall(DynamicPolicy):
         @transition
         def infected(self):
             self.case(is_true(V('R1')) or is_true(V('R3')),C(True))
-            self.defaul(C(False))
+            self.default(C(False))
         @transition
         def policy(self):
             # If exempt, redirect to gardenwall.
