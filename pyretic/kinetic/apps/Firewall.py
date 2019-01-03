@@ -113,11 +113,17 @@ def main():
     mc.add_spec("SPEC AG (R1 -> AX policy=drop)")
     mc.add_spec("SPEC AG (R3 -> AX policy=drop)")
     mc.add_spec("SPEC AG (infected -> AX policy=drop)")
-    # If infected is false, next policy state is always 'allow'
     mc.add_spec("SPEC AG (R0 -> AX policy=identity)")
     mc.add_spec("SPEC AG (R2 -> AX policy=identity)")
     mc.add_spec("SPEC AG (R4 -> AX policy=identity)")
     mc.add_spec("SPEC AG (R5 -> AX policy=identity)")
+    # If infected is false, next policy state is always 'allow'
+    mc.add_spec("SPEC AG (!R0 -> AX policy=drop)")
+    mc.add_spec("SPEC AG (!R1 -> AX policy=identity)")
+    mc.add_spec("SPEC AG (!R2 -> AX policy=drop)")
+    mc.add_spec("SPEC AG (!R3 -> AX policy=identity)")
+    mc.add_spec("SPEC AG (!R4 -> AX policy=drop)")
+    mc.add_spec("SPEC AG (!R5 -> AX policy=drop)")
     ### Policy state is 'allow' until infected is true.
     mc.add_spec("SPEC A [ policy=policy_2 U infected ]")
 
