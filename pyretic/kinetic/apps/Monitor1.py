@@ -25,11 +25,11 @@ from pyretic.kinetic.apps.mac_learner import *
 
 ### Define a class for the application, subclassed from DynamicPolicy
 class Monitor1(DynamicPolicy):
+    v1=2
+    v2=7
+    m=10
+    rates=range(m)
     def __init__(self):
-        v1=2
-        v2=7
-        m=10
-        rates=range(m)
     ### 1. DEFINE THE LPEC FUNCTION
         def lpec(f):
             return match(srcip=f['srcip'])
