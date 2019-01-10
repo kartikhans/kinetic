@@ -37,7 +37,7 @@ class Monitor1(DynamicPolicy):
     ### 2. SET UP TRANSITION FUNCTIONS
         @transition
         def counter(self):
-            for i in range(m):
+            for i in range(Monitor1.m):
                 self.case(V('counter')==C(i),C(i+1))
             self.default(C(0))
         @transition
