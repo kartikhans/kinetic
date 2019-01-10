@@ -26,7 +26,10 @@ from pyretic.kinetic.apps.mac_learner import *
 ### Define a class for the application, subclassed from DynamicPolicy
 class Monitor1(DynamicPolicy):
     def __init__(self):
-        rates=[0,2,7,15]
+        v1=2
+        v2=7
+        m=10
+        rates=range(m)
     ### 1. DEFINE THE LPEC FUNCTION
         def lpec(f):
             return match(srcip=f['srcip'])
@@ -34,21 +37,24 @@ class Monitor1(DynamicPolicy):
     ### 2. SET UP TRANSITION FUNCTIONS
         @transition
         def counter(self):
-            Monitor1.count+=1
-            pol_change=False
-            if(Monitor1.count>=Monitor1.rates[2] and Monitor1.count<Monitor1.rates[3]):
-                pol_change=True
-            self.case(is_true(V('pol_change')),C(True))
+            for i in range(m):
+                self.case(V('counter')==C(i),C(i+1))
+            self.default(C(0))
+        @transition
+        def infected(self):
+            self.case(V('counter')>v2 & V('counter')<=m, C(True))
+            self.default(C(False))
         @transition
         def policy(self):
         # If "infected" is True, change policy to "drop"
-            self.case(is_true(V('counter')),C(drop))
+            self.case(is_true(V('infected')),C(drop))
         # Default policy is "indentity", which is "allow".
             self.default(C(identity))
     ### 3. SET UP THE FSM DESCRIPTION
 
         self.fsm_def =FSMDef(
-                         counter=FSMVar(type=BoolType(),init=False,trans=counter),
+                         counter=FSMVar(type=Type(int,set(rates)),init=0,trans=counter),
+                         infected=FSMVar(type=BoolType(),init=False, trans=infected),
                          policy=FSMVar(type=Type(Policy,{drop,identity}),
                                        init=identity,
                                        trans=policy))
@@ -67,17 +73,17 @@ def main():
     mc = ModelChecker(smv_str, 'Monitor1')
 
     ## Add specs
-    mc.add_spec("FAIRNESS\n  counter;")
     ### If infected event is true, next policy state is 'drop'
-    mc.add_spec("SPEC AG (counter -> AX policy=drop)")
+    mc.add_spec("SPEC AG (infected -> AX policy=drop)")
+    mc.add_spec("SPEC AG ((counter >= v2) -> AX policy=drop)")
     ### If infected event is false, next policy state is 'allow'
-    mc.add_spec("SPEC AG (!counter -> AX policy=policy_1)")
-
+    mc.add_spec("SPEC AG (counter < v2 -> AX policy=identity)")
+    mc.add_spec("SPEC AG (!infected -> AX policy=identity)")
     ### Policy state is 'allow' until infected is true.
-    mc.add_spec("SPEC A [ policy=policy_1 U counter ]")
+    mc.add_spec("SPEC A [ policy=policy_2 U infected ]")
 
     ### It is always possible to go back to 'allow'
-    mc.add_spec("SPEC AG EF policy=policy_1")
+    mc.add_spec("SPEC AG EF policy=policy_2")
 
     # Save NuSMV file
     mc.save_as_smv_file()
