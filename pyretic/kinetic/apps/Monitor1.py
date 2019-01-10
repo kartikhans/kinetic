@@ -28,7 +28,7 @@ class Monitor1(DynamicPolicy):
     v1=2
     v2=7
     m=10
-    rates=range(m)
+    rates=range(m+1)
     def __init__(self):
     ### 1. DEFINE THE LPEC FUNCTION
         def lpec(f):
@@ -42,7 +42,7 @@ class Monitor1(DynamicPolicy):
             self.default(C(0))
         @transition
         def infected(self):
-            self.case(((V('counter')>C(Monitor1.v2)) & (V('counter')<=C(Monitor1.m))), C(True))
+            self.case((is_true(V('counter')>C(Monitor1.v2)) & is_true(V('counter')<=C(Monitor1.m))), C(True))
             self.default(C(False))
         @transition
         def policy(self):
