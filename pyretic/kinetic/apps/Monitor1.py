@@ -42,7 +42,7 @@ class Monitor1(DynamicPolicy):
             self.default(C(0))
         @transition
         def infected(self):
-            self.case((is_true(V('counter')>C(Monitor1.v2)) & is_true(V('counter')<=C(Monitor1.m))), C(True))
+            self.case(is_true((V('counter')>C(Monitor1.v2)) & (V('counter')<=C(Monitor1.m))), C(True))
             self.default(C(False))
         @transition
         def policy(self):
