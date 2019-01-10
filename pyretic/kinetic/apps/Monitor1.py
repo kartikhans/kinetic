@@ -53,7 +53,7 @@ class Monitor1(DynamicPolicy):
     ### 3. SET UP THE FSM DESCRIPTION
 
         self.fsm_def =FSMDef(
-                         counter=FSMVar(type=Type(int,set(rates)),init=0,trans=counter),
+                         counter=FSMVar(type=Type(int,set(Monitor1.rates)),init=0,trans=counter),
                          infected=FSMVar(type=BoolType(),init=False, trans=infected),
                          policy=FSMVar(type=Type(Policy,{drop,identity}),
                                        init=identity,
