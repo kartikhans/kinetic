@@ -42,7 +42,7 @@ class Monitor1(DynamicPolicy):
             self.default(C(0))
         @transition
         def infected(self):
-            self.case(((V('counter')>C(v2)) & (V('counter')<=C(m))), C(True))
+            self.case(((V('counter')>C(Monitor1.v2)) & (V('counter')<=C(Monitor1.m))), C(True))
             self.default(C(False))
         @transition
         def policy(self):
@@ -75,9 +75,9 @@ def main():
     ## Add specs
     ### If infected event is true, next policy state is 'drop'
     mc.add_spec("SPEC AG (infected -> AX policy=drop)")
-    mc.add_spec("SPEC AG ((counter >= v2) -> AX policy=drop)")
+    mc.add_spec("SPEC AG ((counter >= Monitor1.v2) -> AX policy=drop)")
     ### If infected event is false, next policy state is 'allow'
-    mc.add_spec("SPEC AG (counter < v2 -> AX policy=identity)")
+    mc.add_spec("SPEC AG (counter < Monitor1.v2 -> AX policy=identity)")
     mc.add_spec("SPEC AG (!infected -> AX policy=identity)")
     ### Policy state is 'allow' until infected is true.
     mc.add_spec("SPEC A [ policy=policy_2 U infected ]")
